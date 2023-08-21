@@ -1,0 +1,172 @@
+﻿
+
+<div class="card">
+    <h5 class="card-header">Geners <small>Listing all geners</small></h5>
+    <div class="card-body">
+        <table id="genereDatatable" class="table table-striped table-bordered" width="100%" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>#Id</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+
+@section scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+
+        var $table = $('#genereDatatable').dataTable({
+            responsive: true,
+            dom: 'Bfrtip',
+            buttons: [
+                {
+                    text: 'Add Genere',
+                    titleAttr: 'Add new genere',
+                    attr: { id: 'addnewgenereBtn' },
+                    className: "btn btn-outline-primary",
+                    action: function (e, dt, node, config) {
+                        debugger;
+                        onAddUpdateGenere(e.currentTarget, '');
+
+                    },
+                    init: function (api, node, config) {
+                        $(node).removeClass('dt-button').prepend('<span class="tf-icons bx bx-color"></span> ')
+                        //$('span', node).addClass('tf-icons bx bx-folder-plus').html('');
+                    }
+                }
+            ],
+            processing: true,
+            serverSide: true,
+            ordering: false,
+            filter: true,
+            ajax: {
+                "url": "@Url.Action("GetGenerePaging","Genere")",
+                "type": "POST",
+                "datatype": "json",
+                "error": function (jqXHR, textStatus, errorThrown) {
+                    if (typeof jqXHR?.responseJSON?.isSuccess !== "undefined")
+                        showWarningToast(jqXHR.responseJSON.message)
+                }
+            },
+            columns: [
+                { "data": "id", "width": 150 },
+                { "data": "name", "autoWidth": true },
+                { "data": "description", "autoWidth": true },
+                {
+                    "data": "id", "width": 100,
+                    "render":
+                        function (data, row) {
+                            return `
+                                            <button onclick=onAddUpdateGenere(this,'` + data + `')
+                                                 type="button" class="btn-sm btn btn-icon btn-outline-primary">
+                                                 <span class="tf-icons bx bx-edit"></span>
+                                            </button>
+
+                                                    <button onclick=onDetailGenere(this,'` + data + `')
+                                                type="button" class="btn-sm btn btn-icon btn-outline-info">
+                                                        <span class="tf-icons bx bx-detail"></span>
+                                            </button>
+
+                                                    <button onclick=onDeleteGenere(this,'` + data + `')
+                                                type="button" class="btn-sm btn btn-icon btn-outline-danger">
+                                                <span class="tf-icons bx bx-trash"></span>
+                                            </button>
+                                                   `;
+                        }
+                },
+            ]
+        });
+
+        var onAddUpdateGenere = (elm, id) => {
+            $('#modelCenterDynamicContent').load("/GetGenere/" + id, (response, status, xhr) => {
+                if (xhr.status != 200) {
+                    showWarningToast(JSON.parse(response).message);
+                }
+                else {
+                    $("#modalCenter").modal("show");
+                    setTimeout(() => {
+                        $form = $("#modalCenter form")[0];
+                        $.validator.unobtrusive.parse($form)
+                    }, 1000)
+                }
+
+            });
+        }
+
+        var onGenereSubmit = (elm, e) => {
+            e.preventDefault();
+            var $form = $(elm);
+
+            $.post($form.attr("action"), $form.serialize())
+                .done((dt, status, req) => {
+                    debugger;
+                    $table.api().ajax.reload(null, false);
+                    $("#modalCenter").modal("hide");
+                })
+                .fail((jqXHR, res, d) => {
+                    debugger
+                    if (typeof jqXHR?.responseJSON?.isSuccess !== "undefined")
+                        showWarningToast(jqXHR.responseJSON.message)
+                })
+
+
+        }
+
+        var onDeleteGenere = (elm, id) => {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        type: "DELETE",
+                        url: "/DeleteGenere/" + id
+                    })
+                        .done((data) => {
+                            $table.api().ajax.reload(null, false);
+                            showSuccessToast("Your file has been deleted");
+                        })
+                        .fail((jqXHR, textStatus, errorThrown) => {
+                            debugger;
+                            if (typeof jqXHR?.responseJSON?.isSuccess !== "undefined")
+                                showWarningToast(jqXHR.responseJSON.message)
+                        });
+                }
+            })
+
+
+        }
+
+        var onDetailGenere = (elm, id) => {
+            $('#modelCenterDynamicContent').load("/GetDetailGenere/" + id, (response, status, xhr) => {
+                if (xhr.status != 200) {
+                    showWarningToast(JSON.parse(response).message);
+                }
+                else {
+                    $("#modalCenter").modal("show");
+                    setTimeout(() => {
+                        $form = $("#modalCenter form")[0];
+                        $.validator.unobtrusive.parse($form)
+                    }, 1000)
+                }
+
+            });
+        }
+    </script>
+
+
+}
+
+

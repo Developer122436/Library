@@ -1,0 +1,76 @@
+﻿@model IEnumerable<Lib.Services.Dtos.BooksDto>
+
+@{
+    Layout = null;
+}
+
+<style>
+    .searchbook {
+        padding: 15px;
+        border-bottom: 1px solid #eee;
+        margin: 0px 10px;
+    }
+</style>
+
+
+@if(Model?.Count()>0)
+{
+    foreach (var item in Model)
+    {
+       <div class="searchbook">
+            <h5 class="modal-title" id="modalCenterTitle">Book: @item.Title</h5>
+            <dl class="row mt-2">
+                <dt class="col-sm-3">@Html.LabelFor(s=>item.Id)</dt>
+                <dd class="col-sm-9">@item.Id</dd>
+
+                <dt class="col-sm-3">@Html.LabelFor(s=>item.Title)</dt>
+                <dd class="col-sm-9">@item.Title</dd>
+
+                <dt class="col-sm-3">@Html.LabelFor(s=>item.AuthorName)</dt>
+                <dd class="col-sm-9">@item.AuthorName</dd>
+
+                <dt class="col-sm-3">@Html.LabelFor(s=>item.Genere)</dt>
+                <dd class="col-sm-9">@item.Genere</dd>
+
+                <dt class="col-sm-3">@Html.LabelFor(s=>item.CreatedAt)</dt>
+                <dd class="col-sm-9">@item.CreatedAt.Value.ToLocalTime().ToString("dd MMM yyyy")</dd>
+
+                <dt class="col-sm-3">@Html.LabelFor(s=>item.UpdatedAt)</dt>
+                <dd class="col-sm-9">@item.UpdatedAt.Value.ToLocalTime().ToString("dd MMM yyyy")</dd>
+
+            </dl>
+
+            <h5 class="modal-title" id="modalCenterTitle">Loan Subscribers</h5>
+            <dl class="row mt-2">
+                <dd>
+                    @if (item.TotalSubscribers > 0)
+                    {
+                        @for (int i = 0; i < item.TotalSubscribers; i++)
+                        {
+                            <h3 class="subscribername">
+                                @item.Subscribers[i].Firstname @item.Subscribers[i].Lastname
+
+                            </h3>
+                        }
+                    }
+                    else
+                    {
+                        <h6>No subscribers found</h6>
+                    }
+                </dd>
+
+
+
+            </dl>
+        </div>
+    }
+
+}
+else
+{
+    <h6>No books found</h6>
+}
+
+
+
+
